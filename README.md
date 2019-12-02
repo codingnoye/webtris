@@ -1,10 +1,10 @@
-# webtris
+# Webtris
 Tetris with Canvas
 ----
 [**Demo**](http://noye.work/tetris) (Chrome recommended)
 * Module js & OOP in browser
 * Pure canvas + html
-## implemented
+## Implemented
 * SRS
 * Infinity
 * Hold
