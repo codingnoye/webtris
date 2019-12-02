@@ -1,12 +1,15 @@
 # webtris
 Tetris with Canvas
 ----
-[**demo**](http://noye.work/tetris)
+[**demo**](http://noye.work/tetris) (Chrome recommended)
+* Module js & OOP in browser
+* Pure canvas + html
 ## implemented
 * SRS
 * Infinity
 * Hold
 * Level system
 ## TODO
-* Animation and Effect
+* Animation & Effect
 * Improve scoreing system
+* Change dirty codes
