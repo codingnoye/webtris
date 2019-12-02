@@ -1,14 +1,21 @@
-import {random, choose} from './lib.mjs'
 import {colors, Block} from './Block.mjs'
+import {Bag} from './Bag.mjs'
 class Board {
     constructor () {
         this.width = 10;
         this.height = 22;
     }
     init () {
-        this.hold = null
+        this.bag = new Bag()
         this.hand = null
         this.handXY = []
+        this.infinity = false
+        this.infTimeout = null
+
+        this.hold = null
+        this.holdable = true
+
+        this.next = new Block(this.bag.getBlock())
         this.blocks = []
         for (let y=0; y<22; y++) {
             const line = []
@@ -23,13 +30,31 @@ class Board {
         this.game.gameEnd()
     }
     giveBlock () {
-        this.hand = new Block(random(7))
+        this.hand = this.next
         if (this.placable(this.hand.shape, 4, 2)) {
             this.handXY = [4, 2]
         } else {
             this.hand = null
             this.end()
         }
+        this.next = new Block(this.bag.getBlock())
+    }
+    holdBlock () {
+        if (this.hold == null) {
+            this.hold = new Block(this.hand.type)
+            this.giveBlock()
+        } else {
+            const swap = this.hold
+            this.hold = new Block(this.hand.type)
+            this.hand = swap
+            if (this.placable(this.hand.shape, 4, 2)) {
+                this.handXY = [4, 2]
+            } else {
+                this.hand = null
+                this.end()
+            }
+        }
+        this.holdable = false
     }
     placable (shape, x, y) {
         for (let i=0; i<4; i++) {
@@ -48,7 +73,7 @@ class Board {
         const y = this.handXY[1]
         if (this.placable(this.hand.shape, x, y+1)) {
             this.handXY[1] = y+1
-        } else {
+        } else if (!this.infinity) {
             this.place()
         }
     }
@@ -64,16 +89,32 @@ class Board {
         if (this.placable(this.hand.shape, x, y)) {
             this.handXY[0] = x
             this.handXY[1] = y
+            this.infinite()
         }
+    }
+    infinite () {
+        if (this.infTimeout) 
+            clearInterval(this.infTimeout)
+        this.infinity = true
+        this.infTimeout = setTimeout(()=>{this.infinity = false}, this.game.gameTick)
     }
     rotate (clockwise) {
         const x = this.handXY[0]
         const y = this.handXY[1]
         const shape = this.hand.rotateTest(clockwise)
-        if (this.placable(shape, x, y)) {
-            this.handXY[0] = x
-            this.handXY[1] = y
-            this.hand.rotate(clockwise)
+        const kick = this.hand.kick
+        const state = this.hand.state
+        let i = 0
+        while (i<5) {
+            const kx = kick[(clockwise?0:1)][state][i][0]
+            const ky = kick[(clockwise?0:1)][state][i][1]
+            if (this.placable(shape, x + kx, y + ky)) {
+                this.handXY[0] = x + kx
+                this.handXY[1] = y + ky
+                this.hand.rotate(clockwise)
+                break
+            }
+            i++
         }
     }
     place () {
@@ -92,19 +133,33 @@ class Board {
             if (this.check(i)) {
                 this.blocks.splice(i, 1)
                 removed += 1
-                this.game.score += 1
             } else {
                 i++
             }
+        }
+        switch (removed) {
+            case 1:
+                this.game.getScore(100)
+                break;
+            case 2:
+                this.game.getScore(300)
+                break;
+            case 3:
+                this.game.getScore(500)
+                break;
+            case 3:
+                this.game.getScore(1000)
+                this.game.setToast("Tetris!!", 1500)
+                break;
         }
         while (removed > 0) {
             const newarr = [[]]
             let j = 0
             while (j++<this.width) newarr[0].push(-1)
-            console.log(newarr)
             this.blocks = newarr.concat(this.blocks)
             removed -= 1
         }
+        this.holdable = true
         this.giveBlock()
     }
     check (y) {
@@ -117,7 +172,7 @@ class Board {
     }
     draw (ctx) {
         ctx.beginPath()
-        ctx.fillStyle = '#aaa'
+        ctx.fillStyle = '#888'
         ctx.rect(0, 0, 480, 880)
         ctx.fill()
         ctx.closePath()
@@ -126,7 +181,7 @@ class Board {
                 ctx.beginPath()
                 ctx.rect(40 + x * 40 + 2, 40 + y * 40 + 2, 40 - 4, 40 - 4)
                 if (this.blocks[y][x] == -1) {
-                    ctx.fillStyle = '#ccc'
+                    ctx.fillStyle = '#aaa'
                 } else {
                     ctx.fillStyle = colors[this.blocks[y][x]]
                 }
@@ -139,7 +194,7 @@ class Board {
                 ctx.beginPath()
                 ctx.rect(40 + x * 40 + 2, 40 + (y-2) * 40 + 2, 40 - 4, 40 - 4)
                 if (this.blocks[y][x] == -1) {
-                    ctx.fillStyle = '#ccc'
+                    ctx.fillStyle = '#aaa'
                 } else {
                     ctx.fillStyle = colors[this.blocks[y][x]]
                 }
@@ -153,7 +208,7 @@ class Board {
                 const y = this.handXY[1] + this.hand.shape[i][1]
                 if (x<this.width && y<this.height && y>=2 && x>=0) {
                     ctx.beginPath()
-                    ctx.rect(40 + x * 40 + 2, 40 + (y-2) * 40 + 2, 40 - 4, 40 - 4)
+                    ctx.rect(this.game.blockSize + x * this.game.blockSize + 2, this.game.blockSize + (y-2) * this.game.blockSize + 2, this.game.blockSize - 4, this.game.blockSize - 4)
                     ctx.fillStyle = colors[this.hand.type]
                     ctx.fill()
                     ctx.closePath()

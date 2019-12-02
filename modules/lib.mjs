@@ -13,4 +13,15 @@ const choose = (iter) => {
     return iter[random(iter.length)]
 }
 
-export {random, choose}
+const shuffle = (iter) => {
+    let i = iter.length
+    while (i-- > 0) {
+        const newind = random(i)
+        const swap = iter[i]
+        iter[i] = iter[newind]
+        iter[newind] = swap
+    }
+    return iter
+}
+
+export {random, choose, shuffle}
