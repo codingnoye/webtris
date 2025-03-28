@@ -24,4 +24,4 @@ const shuffle = (iter) => {
     return iter
 }
 
-export {random, choose, shuffle}
+export {random, choose, shuffle} 

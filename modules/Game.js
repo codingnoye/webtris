@@ -1,5 +1,5 @@
-import {Board} from './Board.mjs'
-import {colors} from './Block.mjs'
+import {Board} from './Board.js'
+import {colors} from './Block.js'
 const levelTick = [500, 350, 250, 200, 150, 100, 50, 30, 20, 10, 5, 3, 2, 1]
 class Game {
     constructor (ctx) {

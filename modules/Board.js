@@ -1,5 +1,5 @@
-import {colors, Block} from './Block.mjs'
-import {Bag} from './Bag.mjs'
+import {colors, Block} from './Block.js'
+import {Bag} from './Bag.js'
 class Board {
     constructor () {
         this.width = 10;

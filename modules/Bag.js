@@ -1,4 +1,4 @@
-import {shuffle} from './lib.mjs'
+import {shuffle} from './lib.js'
 
 class Bag {
     constructor () {
@@ -13,4 +13,4 @@ class Bag {
         return this.blocks.pop()
     }
 }
-export {Bag}
+export {Bag} 
