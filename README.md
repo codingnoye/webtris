@@ -2,7 +2,7 @@
 Tetris with Canvas
 ----
 [**Demo**](http://noye.work/tetris) (Chrome recommended)
-* Module js & OOP in browser
+* js OOP in browser
 * Pure canvas + html
 ## Implemented
 * SRS
